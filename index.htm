@@ -1,0 +1,290 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Bootstrap demo</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+        <title>Mi primera web</title>
+    </head>
+    <body>
+    <div id="seccion-inicio" 
+     style="max-width: 400px; padding: 20px; border-radius: 12px; color: #ffffff; font-family: Arial, sans-serif; background-image: url('https://wallpapers.com/images/hd/ethereal-background-vma72ynb4o9bhdu8.jpg')">
+
+        <h2 style="margin-bottom: 10px; color: #00c3ff;">Bienvenido</h2>
+        <p style="margin-bottom: 20px;"> Gracias por visitar esta página. Haz clic en el botón para continuar.</p>
+        <button 
+            onclick="mostrarSeccion()" 
+            style="
+                padding: 12px 20px; 
+                background-color: #77c17c; 
+                color: #FFF; 
+                border: none; 
+                border-radius: 8px; 
+                cursor: pointer; 
+                font-size: 16px;
+                font-weight: bold;
+            ">
+            Continuar
+        </button>
+    </div>
+
+
+    <!-- SECCIÓN OCULTA -->
+    <div id="seccion-opciones" 
+        style="display: none;">
+        <!-- CARDS -->
+        <div class="container px-4 py-5" id="custom-cards"> 
+            <div class="row row-cols-1 row-cols-lg-3 align-items-stretch g-4 py-5"> 
+                <!-- FIRST CARD -->
+                <div class="col"> 
+                    <div class="card card-cover h-100 overflow-hidden text-bg-dark rounded-4 shadow-lg" style="background-image: url('https://img.freepik.com/free-vector/sky-heaven-nature-sunset-sunrise_107791-583.jpg');"> 
+                        <div class="d-flex flex-column h-100 p-5 pb-3 text-black text-shadow-1"> 
+                            <p style="color: #4c5bce; "> Pega aquí tus notas:</p>
+                            <textarea id="notas" rows="16" cols="40"></textarea>
+                            <br><br>
+                            <button id="btn" style="
+                                padding: 12px 20px; 
+                                background-color: #77c17c; 
+                                color: #FFF; 
+                                border: none; 
+                                border-radius: 8px; 
+                                cursor: pointer; 
+                                font-size: 16px;
+                                font-weight: bold;
+                                width: 100%;
+                                margin-bottom: 10px;
+                                ">Generar resumen
+                            </button>
+                        </div> 
+                    </div> 
+                </div> 
+                <!-- SECOND CARD -->
+                <div class="col"> 
+                    <div class="card card-cover h-100 overflow-hidden text-bg-dark rounded-4 shadow-lg" style="background-image: url('https://wallpapers.com/images/hd/ethereal-background-vma72ynb4o9bhdu8.jpg');"> 
+                        <div class="d-flex flex-column h-100 p-5 pb-3 text-white text-shadow-1"> 
+                            <h2>Resultado:</h2>
+                            <div id="resultado"></div>.</p>
+                        </div> 
+                    </div> 
+                </div> 
+                <!-- THIRD CARD -->
+                <div class="col"> 
+                    <div class="card card-cover h-100 overflow-hidden text-bg-dark rounded-4 shadow-lg" style="background-image: url('https://4kwallpapers.com/images/walls/thumbs_3t/19682.jpg');"> 
+                        <div class="d-flex flex-column h-100 p-5 pb-3 text-white text-shadow-1"> 
+                                <button id="btnPreguntas" style="
+                                padding: 12px 20px; 
+                                background-color: #77c17c; 
+                                color: #FFF; 
+                                border: none; 
+                                border-radius: 8px; 
+                                cursor: pointer; 
+                                font-size: 16px;
+                                font-weight: bold;
+                                width: 100%;
+                                margin-bottom: 10px;
+                                ">Generar preguntas
+                                </button>
+                                <div id="preguntas"></div>
+                        </div> 
+                    </div> 
+                </div> 
+            </div> 
+        </div>
+    </div>
+    </body>
+
+<script>
+    const API_KEY = "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";
+
+    const boton = document.getElementById("btn");
+    const notas = document.getElementById("notas");
+    const resultado = document.getElementById("resultado");
+
+    // NUEVO: Div para imagen
+    let imagenDiv = document.createElement("div");
+    imagenDiv.id = "imagen";
+    imagenDiv.style.marginTop = "15px";
+    resultado.parentNode.insertBefore(imagenDiv, resultado.nextSibling);
+
+    // Mostrar Seccion
+    function mostrarSeccion() {
+        document.getElementById("seccion-inicio").style.display = "none";
+        document.getElementById("seccion-opciones").style.display = "block";
+    }
+
+    boton.addEventListener("click", function () {
+        const texto = notas.value;
+
+        resultado.innerHTML = "Generando resumen con IA...";
+        imagenDiv.innerHTML = ""; // Limpiar imagen anterior
+
+        // 1️⃣ PRIMERA API CALL → Generar resumen
+        fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + API_KEY
+            },
+            body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [
+                    { role: "system", content: "Eres un asistente que genera resúmenes claros y cortos." },
+                    { role: "user", content: "Resume este texto: " + texto }
+                ]
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const resumen = data.choices[0].message.content;
+            resultado.innerHTML = resumen;
+
+            // 2️⃣ SEGUNDA API CALL → Generar imagen relacionada
+            imagenDiv.innerHTML = "Generando imagen...";
+            
+            return fetch("https://api.openai.com/v1/images/generations", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + API_KEY
+                },
+                body: JSON.stringify({
+                    model: "gpt-image-1",
+                    prompt: "Genera una imagen educativa, clara y visual relacionada con este contenido: " + resumen,
+                    size: "1024x1024"
+                })
+            });
+        })
+        .then(res => res.json())
+        .then(imgData => {
+            const base64 = imgData.data[0].b64_json;
+            const imageURL = `data:image/png;base64,${base64}`;
+
+            imagenDiv.innerHTML = `
+                <img src="${imageURL}" 
+                    style="width:100%; border-radius:12px; margin-top:10px;">
+            `;
+
+        })
+        .catch(err => {
+            console.error(err);
+            resultado.innerHTML = "Error al generar resumen.";
+            imagenDiv.innerHTML = "No se pudo generar la imagen.";
+        });
+    });
+
+
+    // API CALL - Preguntas
+    const btnPreguntas = document.getElementById("btnPreguntas");
+    const preguntasDiv = document.getElementById("preguntas");
+
+    btnPreguntas.addEventListener("click", function () {
+        const texto = notas.value;
+        preguntasDiv.innerHTML = "Generando preguntas con IA...";
+
+        fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + API_KEY
+            },
+            body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [
+                    { role: "system", content: "Genera 5 preguntas de estudio cortas basadas en el texto." },
+                    { role: "user", content: "Crea preguntas sobre: " + texto }
+                ]
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const preguntas = data.choices[0].message.content;
+            preguntasDiv.innerHTML = preguntas.replace(/\n/g, "<br>");
+        })
+        .catch(err => {
+            console.error(err);
+            preguntasDiv.innerHTML = "Error al generar preguntas.";
+        });
+    });
+
+</script>
+
+    <!--
+
+    <script>
+        const API_KEY = "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"; 
+        const boton = document.getElementById("btn");
+        const notas = document.getElementById("notas");
+        const resultado = document.getElementById("resultado");
+
+        //Mostrar Seccion
+        function mostrarSeccion() {
+            document.getElementById("seccion-inicio").style.display = "none";
+            document.getElementById("seccion-opciones").style.display = "block";
+        }
+
+        boton.addEventListener("click", function() {
+        const texto = notas.value;
+
+        //API CALL - Resumen.
+        resultado.innerHTML = "Generando resumen con IA...";
+
+        fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + API_KEY
+            },
+            body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [
+                    { role: "system", content: "Eres un asistente que genera resúmenes claros y cortos." },
+                    { role: "user", content: "Resume este texto: " + texto }
+                ]
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const resumen = data.choices[0].message.content;
+            resultado.innerHTML = resumen;
+        })
+        .catch(err => {
+            console.error(err);
+            resultado.innerHTML = "Error al generar resumen.";
+        });                
+        });
+
+    // API CALL - Preguntas.
+    const btnPreguntas = document.getElementById("btnPreguntas");
+    const preguntasDiv = document.getElementById("preguntas");
+
+    btnPreguntas.addEventListener("click", function() {
+        const texto = notas.value;
+        preguntasDiv.innerHTML = "Generando preguntas con IA...";
+
+        fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + API_KEY
+            },
+            body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [
+                    { role: "system", content: "Genera 5 preguntas de estudio cortas basadas en el texto." },
+                    { role: "user", content: "Crea preguntas sobre: " + texto }
+                ]
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const preguntas = data.choices[0].message.content;
+            preguntasDiv.innerHTML = preguntas.replace(/\n/g, "<br>");
+        })
+        .catch(err => {
+            console.error(err);
+            preguntasDiv.innerHTML = "Error al generar preguntas.";
+        });
+    });
+
+    </script> -->
+</html>
